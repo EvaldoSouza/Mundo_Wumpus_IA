@@ -5,7 +5,6 @@
 # [[A],[],[],[]],
 # [[A],[],[],[]]]
 
-from operator import truediv
 import random
 #criar uma lista com o que o espaço vai ter
 #criar a matriz com todo o ambiente
@@ -82,7 +81,7 @@ class Ambiente:
         for l in range(self.linhas):
             for c in range(self.colunas):
                 if espaco[l][c].buraco:
-                    print("Buraco em: ", l, c)
+                    #print("Buraco em: ", l, c)
                     try:
                         espaco[l-1][c].brisa = True
                         #print("Brisa em:", l-1, c)
@@ -104,7 +103,7 @@ class Ambiente:
                     except IndexError:
                         pass
                 elif espaco[l][c].wumpus:
-                    print("Wumpus em: ", l, c)
+                    #print("Wumpus em: ", l, c)
                     try:
                         espaco[l-1][c].fedor = True
                     except IndexError:
@@ -122,7 +121,7 @@ class Ambiente:
                     except IndexError:
                         pass
                 elif espaco[l][c].ouro:
-                    print("Ouro em: ", l, c)
+                    #print("Ouro em: ", l, c)
                     try:
                         espaco[l-1][c].brilho = True
                     except IndexError:
@@ -140,7 +139,6 @@ class Ambiente:
                     except IndexError:
                         pass
         
-        self.imprimir(espaco)
+        return espaco
+        #self.imprimir(espaco)
                 
-novo = Ambiente(4,4)
-novo.distribuir()
