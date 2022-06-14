@@ -1,0 +1,1 @@
+#recebe percepções, e devolver ações a fazer
