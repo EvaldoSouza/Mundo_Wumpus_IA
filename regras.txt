@@ -1,0 +1,5 @@
+#regras de ação para o mundo de Wumpus
+
+se brisa em atual, entao buraco em vizinho
+se fedor em atual, entao wumpus em vizinho
+se brilho em atual, entao ouro em vizinho

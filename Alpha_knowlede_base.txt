@@ -1,0 +1,7 @@
+#base de conhecimento do mundo de Wumpus
+[2, 2] ('wumpus', False)
+[2, 2] ('ouro', False)
+[2, 2] ('buraco', False)
+[2, 2] ('fedor', False)
+[2, 2] ('brilho', True)
+[2, 2] ('brisa', False)
