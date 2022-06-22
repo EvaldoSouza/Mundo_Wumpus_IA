@@ -1,8 +1,8 @@
 
-import ambiete
+import ambiente
 
 class Sensor:
-    def __init__(self, caverna: ambiete.Ambiente) -> None:
+    def __init__(self, caverna: ambiente.Ambiente) -> None:
         self.vivo = True
         self.pegou_ouro = False
         self.caverna = caverna
