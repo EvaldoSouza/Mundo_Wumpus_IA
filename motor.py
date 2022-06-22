@@ -2,6 +2,7 @@
 #unica função que escreve e lê da base de dados
 #o objetivo é ir tirando todos os "ou" dos fatos, resolvendo os "se...então"
 
+from email.mime import base
 import utils
 class Motor:
     def __init__(self) -> None:
@@ -23,6 +24,18 @@ class Motor:
     def fechar_bc(self):
         self.bc.close()
     
+    def _deletar_linha(self, linha):
+        #tem que tirar o \n
+        arquivo = self.bc.readlines()
+        self.bc.seek(0)
+        
+        for l in arquivo:
+            
+            if l != linha:
+                self.bc.write(l)
+        
+        self.bc.truncate()
+
     #limpa deducoes comprovadamente falsas (usando fatos)
     def _limpar_deducoes(self, fato: str):
         base_conhecimento = self.bc.readlines()
@@ -32,13 +45,10 @@ class Motor:
         fato_estado = fato[21:]
         #print(fato_estado)
         for linha in base_conhecimento:
-            #encontrando cada deducao e tirando sua coodenada
             if linha.find("deducao") != -1:
                 #checando se a deducao é na msm quadrado e msm tema
                 if linha.find(fato_coord) != -1 and linha.find(fato_tema) != -1:
-                    if linha.find(fato_estado) != -1:
-                        #se o fato for true e a deducao for true
-                        pass
+                    self._deletar_linha(linha)
 
     #recebe as percepções do quadrado atual, e anota na KB
     def _anotar_bc(self, percepcoes: dict, coordenadas):
@@ -64,7 +74,6 @@ class Motor:
             if flag:
                 self.bc.write(item)
                 self._limpar_deducoes(item)
-
         
     #pega as coordenas, a KB e faz inferencias. Só trabalha com fatos e conclusões fortes
     def _inferir(self, coordenadas, percepcoes: dict):
@@ -103,7 +112,6 @@ class Motor:
                         if conhecimento.find("False") != -1 and conhecimento.find("fato") != -1:
                             #print("removendo: ", deducao)
                             dados.remove(deducao)
-                            #remover as deducoes passadas aqui?
 
         #preciso criar um tipo diferente de conhecimento? = deducao?
         for d in dados:
@@ -113,29 +121,52 @@ class Motor:
             #quando provar que uma deducao é falsa, remove todas da base
             #quando for tomar uma decisao, usar um contador, quanto mais deducoes iguais, mais provavel
 
-    
-    def informacoes(self, coordenadas):
+
+    def fatos(self, coordenadas):
         #pega as coordenadas e a KB e retornar todas os fatos a respeito dos vizinhos
-        pass
-    def duvidas(self, coordenadas):
+        vizinhos = utils.vizinhos(coordenadas, self.tam_ambiente)
+        base_conhecimento = self.bc.readlines()
+
+        lista_de_fatos = []
+
+        #para cada vizinho, consultar os fatos
+        for linha in base_conhecimento:
+            for viz in vizinhos:
+                if linha.find(str(viz)) != -1 and linha.find("fato") != -1:
+                    lista_de_fatos.append(linha)
+                    
+        return lista_de_fatos
+
+
+    def deducoes(self, coordenadas):
         #pega as coordenadas e a KB, e retorna todas "se então" relacionadas com as vizinhas
         #(se 1,1: brisa) então ((2,1: buraco) ou (0,1: buraco))
         #sao as deducoes
-        pass
+        vizinhos = utils.vizinhos(coordenadas, self.tam_ambiente)
+        base_conhecimento = self.bc.readlines()
+        lista_de_deducoes = []
+        for linha in base_conhecimento:
+            for viz in vizinhos:
+                if linha.find(str(viz)) != -1 and linha.find("fato") != -1:
+                    lista_de_deducoes.append(linha)
+
+        return lista_de_deducoes
 
 
-percepicoes = {
-            "wumpus" : False,
-            "ouro" : False,
-            "buraco" : False,
-            "fedor": True,
-            "brisa" :True
-        }
-novo = Motor()
-#novo.cria_bc('Alpha')
-novo.abrir_bc('Alpha')
-fato = "fato [0, 2] (buraco, True)"
-# novo._anotar_bc(percepicoes, [2,2])
-# novo.abrir_bc('Alpha') #tenho que abrir de novo, pq a func fecha automaticamente
-#novo._inferir([1,2], percepicoes)
-novo._limpar_deducoes(fato)
+# percepicoes = {
+#             "wumpus" : False,
+#             "ouro" : False,
+#             "buraco" : False,
+#             "fedor": True,
+#             "brisa" :True
+#         }
+# novo = Motor()
+# #novo.cria_bc('Alpha')
+# novo.abrir_bc('Alpha')
+# fato = "deducao [0, 2] (wumpus, True)\n"
+# # novo._anotar_bc(percepicoes, [2,2])
+# # novo.abrir_bc('Alpha') #tenho que abrir de novo, pq a func fecha automaticamente
+# #novo._inferir([1,2], percepicoes)
+# #novo._limpar_deducoes(fato)
+# #novo._deletar_linha(fato)
+# novo.fatos([2,1])
