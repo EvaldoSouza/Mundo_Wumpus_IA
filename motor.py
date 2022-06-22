@@ -1,9 +1,12 @@
 #recebe percepções, e devolver novas informações
 #unica função que escreve e lê da base de dados
 #o objetivo é ir tirando todos os "ou" dos fatos, resolvendo os "se...então"
+
+import utils
 class Motor:
     def __init__(self) -> None:
         self.bc = None
+        self.tam_ambiente = [4,4]
         pass
     
     #cria o arquivo da base de conhecimento
@@ -20,8 +23,25 @@ class Motor:
     def fechar_bc(self):
         self.bc.close()
     
+    #limpa deducoes comprovadamente falsas (usando fatos)
+    def _limpar_deducoes(self, fato: str):
+        base_conhecimento = self.bc.readlines()
+
+        fato_coord = fato[5:12]
+        fato_tema = fato[13:19]
+        fato_estado = fato[21:]
+        #print(fato_estado)
+        for linha in base_conhecimento:
+            #encontrando cada deducao e tirando sua coodenada
+            if linha.find("deducao") != -1:
+                #checando se a deducao é na msm quadrado e msm tema
+                if linha.find(fato_coord) != -1 and linha.find(fato_tema) != -1:
+                    if linha.find(fato_estado) != -1:
+                        #se o fato for true e a deducao for true
+                        pass
+
     #recebe as percepções do quadrado atual, e anota na KB
-    def atual(self, perceptions: dict, coordenadas):
+    def _anotar_bc(self, percepcoes: dict, coordenadas):
         #anotar essas percepções na KB
         #coordenada: percepção ( 1,1: brisa) (1,1: sem fedor)
         
@@ -30,38 +50,26 @@ class Motor:
         # se a percepção ja tiver (no caso de estar voltando), não escrever
         lista = []
         base_conhecimento = self.bc.readlines()
-        for info in perceptions.items():
-            p = str(coordenadas) + " " + str(info) + '\n'
+        for info in percepcoes.items():
+            p = "fato " + str(coordenadas) + " " + str(info) + '\n'
             lista.append(p)
-            # if p in self.bc.readlines():
-            #     print(p)
-            # else:
-            #     self.bc.write(p)
-        # for item in lista:
-        #     self.bc.write(item)
         
+        #nao adiciona fatos repetidos
         for item in lista:
             flag = True
             for linha in base_conhecimento:
                 if item == linha:
-                    print("achei")
                     flag = False
                     break
             if flag:
-                self.bc.write(item) 
-                       
-            
+                self.bc.write(item)
+                self._limpar_deducoes(item)
+
         
-        # for line in self.bc.readlines():
-        #     print(line)
-        
-        #chama a _inferir
-        self._inferir(coordenadas)
-        pass
-    
     #pega as coordenas, a KB e faz inferencias. Só trabalha com fatos e conclusões fortes
-    def _inferir(self, coordenadas):
-        #pega as coordenas, a KB e faz inferencias
+    def _inferir(self, coordenadas, percepcoes: dict):
+        #pega as coordenas, as percepções a KB e faz inferencias
+        #percepções é um dicionario
         #se (coordenada: percepção), então (coordenada_vizinha: contem)
         #(se 1,1: brisa) então ((1,2: buraco) ou (2,1: buraco) ou (0,1: buraco))
         #busca na KB as coordenadas referidas (as vizinhas)
@@ -70,12 +78,41 @@ class Motor:
         # anota apenas (se 1,1: brisa) então ((2,1: buraco) ou (0,1: buraco))
         #cuidado que essa lógica começa a ficar fudida
         
-        #se brisa em atual, entao buraco em vizinho
-        #se fedor em atual, entao wumpus em vizinho
-        #se brilho em atual, entao ouro em vizinho
-        # for lines in self.bc:
-        #     print(lines)
-        pass
+        vizinhos = utils.vizinhos(coordenadas, self.tam_ambiente)
+        dados = []
+        
+        #inferindo ao redor
+        for info in percepcoes.items():
+            if info[0] == "fedor" and info[1]:
+                for v in vizinhos:
+                    inferencia = (v, "wumpus")
+                    dados.append(inferencia)
+            if info[0] == "brisa" and info[1]:
+                for v in vizinhos:
+                    inferencia = (v, "buraco")
+                    dados.append(inferencia)
+        
+        #consultando a base e não anota deducao que já é provada como falsa
+        base = self.bc.readlines()
+        for deducao in dados:
+            for conhecimento in base:
+                if conhecimento.find(str(deducao[0])) != -1:
+                    #conhecimento contem uma menção ao quadrado da deducao
+                    if conhecimento.find(str(deducao[1])) != -1:
+                        #contem uma menção tanto ao qadrado quanto ao conteudo
+                        if conhecimento.find("False") != -1 and conhecimento.find("fato") != -1:
+                            #print("removendo: ", deducao)
+                            dados.remove(deducao)
+                            #remover as deducoes passadas aqui?
+
+        #preciso criar um tipo diferente de conhecimento? = deducao?
+        for d in dados:
+            frase = "deducao " + str(d[0])+ ' (' + d[1] + ", True)" +'\n'
+            self.bc.write(frase)
+            #vai escrever um monte de deducao repetida, acho que nao tem problema
+            #quando provar que uma deducao é falsa, remove todas da base
+            #quando for tomar uma decisao, usar um contador, quanto mais deducoes iguais, mais provavel
+
     
     def informacoes(self, coordenadas):
         #pega as coordenadas e a KB e retornar todas os fatos a respeito dos vizinhos
@@ -83,6 +120,7 @@ class Motor:
     def duvidas(self, coordenadas):
         #pega as coordenadas e a KB, e retorna todas "se então" relacionadas com as vizinhas
         #(se 1,1: brisa) então ((2,1: buraco) ou (0,1: buraco))
+        #sao as deducoes
         pass
 
 
@@ -90,11 +128,14 @@ percepicoes = {
             "wumpus" : False,
             "ouro" : False,
             "buraco" : False,
-            "fedor": False,
-            "brilho" : True,
-            "brisa" :False
+            "fedor": True,
+            "brisa" :True
         }
 novo = Motor()
 #novo.cria_bc('Alpha')
 novo.abrir_bc('Alpha')
-novo.atual(percepicoes, [2,2])
+fato = "fato [0, 2] (buraco, True)"
+# novo._anotar_bc(percepicoes, [2,2])
+# novo.abrir_bc('Alpha') #tenho que abrir de novo, pq a func fecha automaticamente
+#novo._inferir([1,2], percepicoes)
+novo._limpar_deducoes(fato)

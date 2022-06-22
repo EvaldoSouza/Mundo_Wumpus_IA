@@ -15,7 +15,6 @@ class Quadrado:
         self.ouro = False
         self.buraco = False
         self.fedor = False
-        self.brilho = False
         self.brisa = False
     
     #vou acessar as variaveis diretamente
@@ -118,24 +117,6 @@ class Ambiente:
                         pass
                     try:
                         espaco[l][c+1].fedor = True
-                    except IndexError:
-                        pass
-                elif espaco[l][c].ouro:
-                    #print("Ouro em: ", l, c)
-                    try:
-                        espaco[l-1][c].brilho = True
-                    except IndexError:
-                        pass
-                    try:
-                        espaco[l+1][c].brilho = True
-                    except IndexError:
-                        pass
-                    try:
-                        espaco[l][c-1].brilho = True
-                    except IndexError:
-                        pass
-                    try:
-                        espaco[l][c+1].brilho = True
                     except IndexError:
                         pass
         
