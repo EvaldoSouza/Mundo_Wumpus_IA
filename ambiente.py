@@ -21,13 +21,22 @@ class Quadrado:
     def imprimir(self):
         print("Wumpus: ", self.wumpus, ". Ouro: ", self.ouro, ". Buraco:", self.buraco, ". Fedor:", self.fedor, ". Brilho: ", self.brilho, ". Brisa: ", self.brisa)
 
+    def retorna_dict(self):
+        percepicoes = {
+            "wumpus" : self.wumpus,
+            "ouro" : self.ouro,
+            "buraco" : self.buraco,
+            "fedor": self.fedor,
+            "brisa" :self.brisa
+        }
+        return percepicoes
 class Ambiente:
     def __init__(self, linhas, colunas) -> None:
         self.linhas = linhas
         self.colunas = colunas
         self.quant_quad = linhas*colunas
     
-    def conteudo(self):
+    def _conteudo(self):
         contem = []
         contem.append("Wumpus")
         contem.append("Ouro")
@@ -46,7 +55,8 @@ class Ambiente:
             for c in range(self.colunas):
                 print( l, c, ":")
                 espaco[l][c].imprimir()
-                
+
+               
     def distribuir(self):
         espaco = []
         for l in range(self.linhas):
@@ -56,7 +66,7 @@ class Ambiente:
                 quadro = Quadrado()
                 linha.append(quadro)
         
-        conteudos = self.conteudo()
+        conteudos = self._conteudo()
         random.shuffle(conteudos)
         
         for l in range(self.linhas):

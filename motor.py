@@ -2,12 +2,11 @@
 #unica função que escreve e lê da base de dados
 #o objetivo é ir tirando todos os "ou" dos fatos, resolvendo os "se...então"
 
-from email.mime import base
 import utils
 class Motor:
-    def __init__(self) -> None:
+    def __init__(self, linhas, colunas) -> None:
         self.bc = None
-        self.tam_ambiente = [4,4]
+        self.tam_ambiente = [linhas, colunas]
         pass
     
     #cria o arquivo da base de conhecimento
@@ -76,7 +75,7 @@ class Motor:
                 self._limpar_deducoes(item)
         
     #pega as coordenas, a KB e faz inferencias. Só trabalha com fatos e conclusões fortes
-    def _inferir(self, coordenadas, percepcoes: dict):
+    def inferir(self, coordenadas, percepcoes: dict):
         #pega as coordenas, as percepções a KB e faz inferencias
         #percepções é um dicionario
         #se (coordenada: percepção), então (coordenada_vizinha: contem)
