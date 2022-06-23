@@ -1,4 +1,7 @@
-coisa = [["coisa", "koisa"], ["necas", "qicas"]]
-lista = [1,1]
-palavra = coisa[lista[0]][lista[1]]
-print(str(palavra))
+from random import randrange
+
+
+for i in range(200000):
+    flag = randrange(5)
+    if flag >= 5:
+        print("falso")

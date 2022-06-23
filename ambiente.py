@@ -83,7 +83,10 @@ class Ambiente:
                     if coisa == "Buraco":
                         espaco[l][c].buraco = True
                     if coisa == "Wumpus":
-                        espaco[l][c].wumpus = True
+                        #fazer o wumpus ter chance cair em um buraco ou em cima do ouro
+                        lin = random.randrange(self.linhas)
+                        col = random.randrange(self.colunas)
+                        espaco[lin][col].wumpus = True
                     if coisa == "Ouro":
                         espaco[l][c].ouro = True
         
@@ -132,4 +135,6 @@ class Ambiente:
         
         return espaco
         #self.imprimir(espaco)
-                
+
+quad = Quadrado()
+print(quad.wumpus)

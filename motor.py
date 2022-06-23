@@ -4,9 +4,10 @@
 
 import utils
 class Motor:
-    def __init__(self, linhas, colunas) -> None:
+    def __init__(self, linhas, colunas, marcar) -> None:
         self.bc = None
         self.tam_ambiente = [linhas, colunas]
+        self.cria_bc(marcar) #sera que posso fazer isso?
         pass
     
     #cria o arquivo da base de conhecimento
@@ -146,7 +147,7 @@ class Motor:
         lista_de_deducoes = []
         for linha in base_conhecimento:
             for viz in vizinhos:
-                if linha.find(str(viz)) != -1 and linha.find("fato") != -1:
+                if linha.find(str(viz)) != -1 and linha.find("deducao") != -1:
                     lista_de_deducoes.append(linha)
 
         return lista_de_deducoes

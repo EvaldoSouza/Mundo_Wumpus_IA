@@ -1,18 +1,18 @@
 #o que fazer no agente?
 #preciso do sensor, do atuador, motor de inferencia e base de conhecimento fazer separado
 #o agente pega as informações do sensor, passa para o motor, pegar as respostas do motor, e passa para o atuador
-from unittest import case
-import sensor
 import motor
 import ambiente
-
-
+import utils
 
 class Agete:
     def __init__(self) -> None:
         self.caverna = None
+        self.wumpus = True
+        self.atirei = False
         self.lado_que_olho = [0,1]
         self.posicao_atual = [0,0]
+        self.lista_visitados = [] #salvando quadrados
         pass
 
     def entrar_caverna(self, linhas, colunas):
@@ -20,8 +20,8 @@ class Agete:
         caverna.distribuir()
         self.caverna = caverna
 
-    def cachola(self, linhas, colunas):
-        self.pensador = motor.Motor(linhas, colunas)
+    def cachola(self, linhas, colunas, marcar):
+        self.pensador = motor.Motor(linhas, colunas, marcar)
     
     #conferindo se é uma parede. Retorna false se for
     def parede(self):
@@ -57,6 +57,105 @@ class Agete:
         #esse local é um Quadrado
         local = self.caverna[self.posicao_atual[0]][self.posicao_atual[1]]
         return local.retorna_dict()
+    
+    def atirar(self):
+        self.atirei = True
+        #preciso checar todos os quadrados na direção que to olhando
+        linha_atual = self.posicao_atual[0]
+        coluna_atual = self.posicao_atual[1]
+
+        linhas = len(self.caverna)
+        colunas = len(self.caverna[0])
+
+        if self.lado_que_olho[0] < linha_atual:
+            #to olhando pra norte
+            for i in range(self.lado_que_olho[0], -1, -1):
+                if self.caverna[i][coluna_atual].wumpus:
+                    self.wumpus = False
+                    break
+        if self.lado_que_olho[0] > linha_atual:
+            #to olhando pro sul
+            for i in range(self.lado_que_olho[0], linhas, 1):
+                if self.caverna[i][coluna_atual].wumpus:
+                    self.wumpus = False
+                    break
+        if self.lado_que_olho[1] < coluna_atual:
+            #to olhando pro oeste
+            for i in range(self.lado_que_olho[1], -1, -1):
+                if self.caverna[linha_atual][i].wumpus:
+                    self.wumpus = False
+                    break
+        if self.lado_que_olho[1] > coluna_atual:
+            #to olhando pro leste
+            for i in range(self.lado_que_olho[1], colunas, 1):
+                if self.caverna[linha_atual][i].wumpus:
+                    self.wumpus = False
+                    break
+
+    def pegar_ouro(self):
+        if self.caverna[self.posicao_atual[0]][self.posicao_atual[1]].ouro:
+            #ativar o caminho de volta
+            self.caminho_de_volta()
+            return True
+        else:
+            return False
+    
+    def caminho_de_volta():
+        pass
+
+    def proximo_passo(self):
+        atual = self.olhar_quadrado()
+        self.lista_visitados.append(atual)
+        vizinhos = utils.vizinhos()
+        self.pensador.inferir(self.posicao_atual, atual) #escreve na base os pensamentos
+        conhecimento = self.pensador.fatos(self.posicao_atual)
+        inferencias = self.pensador.deducoes(self.posicao_atual)
+
+
+        #criar uma lista de quadrados seguros, coordenadas
+        seguros = [] #sempre pode andar para o seguro
+        morte = []#nunca pode andar para o morte
+        perigosos = []#não dá para se viver sem riscos
+
+        #se a posição atual não tiver nem fedor nem brisa, vizinhos são seguros
+        if not self.caverna[self.posicao_atual[0]][self.posicao_atual[1]].fedor and not self.caverna[self.posicao_atual[0]][self.posicao_atual[1]].brisa:
+            seguros.append(vizinhos)
+
+        #pega os seguros
+        for dado in conhecimento:
+            if dado.find("buraco") != -1 and dado.find("False") != -1:
+                fato_coord = dado[5:12]
+                seguros.append(fato_coord)
+            if dado.find("wumpus") != -1 and dado.find("False") != -1:
+                fato_coord = dado[5:12]
+                seguros.append(fato_coord)
+        
+        #pega os morte certa
+        for dado in conhecimento:
+            if dado.find("buraco") != -1 and dado.find("True") != -1:
+                fato_coord = dado[5:12]
+                morte.append(fato_coord)
+            if self.wumpus: #se o wumpus tiver vivo
+                if dado.find("wumpus") != -1 and dado.find("True") != -1:
+                    fato_coord = dado[5:12]
+                    morte.append(fato_coord)
+
+        #pega os perigosos
+        #aqui usa as deduções
+        for deducao in inferencias:
+            if deducao:
+                pass
+
+        
+
+        #escrever a posição atual, o conhecimento e as inferencias em um txt
+
+        #tomar as decisões
+        #primeiro conferir os fatos. Se of fatos não derem o prox passo, vai pra dedução?
+        #não!
+        #se os fatos n derem prox_p, voltar pro quadrado seguro e buscar outro seguro
+        pass
+
 #como fazer esse agente?
 #preciso me mover pelo ambiente
 #---o ambiente é uma matriz, então eu me "movo" somando e subtraindo das posições
