@@ -141,8 +141,12 @@ class Agete:
                     morte.append(fato_coord)
 
         #pega os perigosos
-        #aqui usa as deduções
+        #As deduções são no formato [x,y] (b v w) (T v F)
+        #aqui usa as deduções. Elas podem ser contraditórias? Acho que sim. Pode ter dedução False?
+        #Não tem dedução de False! Então n tem contraditórias
+        #Deduzir para achar o proximo movimento, aka "Falses"
         for deducao in inferencias:
+            #se deduzir que não tem nem wumpus nem
             if deducao:
                 pass
 

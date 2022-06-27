@@ -137,7 +137,7 @@ class Motor:
                     
         return lista_de_fatos
 
-
+    #retorna todas as deduções relacionadas aos vizinhos de coordenadas
     def deducoes(self, coordenadas):
         #pega as coordenadas e a KB, e retorna todas "se então" relacionadas com as vizinhas
         #(se 1,1: brisa) então ((2,1: buraco) ou (0,1: buraco))
