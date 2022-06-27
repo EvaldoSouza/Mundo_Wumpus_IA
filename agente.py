@@ -13,6 +13,7 @@ class Agete:
         self.lado_que_olho = [0,1]
         self.posicao_atual = [0,0]
         self.lista_visitados = [] #salvando quadrados
+        self.seguros_inexplorados = [] #será que é util?
         pass
 
     def entrar_caverna(self, linhas, colunas):
@@ -103,9 +104,39 @@ class Agete:
     def caminho_de_volta():
         pass
 
+    def controle_seguros(self, atual):
+        for seg in self.seguros_inexplorados:
+            if atual == seg:
+                self.seguros_inexplorados.pop(atual)
+                return
+
+    def adicionar_seguros(self, novos: list):
+        for n in novos:
+            flag = True
+            for seg in self.seguros_inexplorados:
+                if seg == n:
+                    flag = False
+            if flag:
+                self.seguros_inexplorados.append(n)
+                    
+    def consulta_seguros(self, coord):
+        for seg in self.seguros_inexplorados:
+            if coord == seg:
+                return True
+        
+        return False
+    
+    def consulta_visitado(self, coord):
+        for vis in self.lista_visitados:
+            if coord == vis:
+                return True
+        
+        return False
+
     def proximo_passo(self):
         atual = self.olhar_quadrado()
         self.lista_visitados.append(atual)
+        self.controle_seguros(atual)
         vizinhos = utils.vizinhos()
         self.pensador.inferir(self.posicao_atual, atual) #escreve na base os pensamentos
         conhecimento = self.pensador.fatos(self.posicao_atual)
@@ -130,6 +161,8 @@ class Agete:
                 fato_coord = dado[5:12]
                 seguros.append(fato_coord)
         
+        self.adicionar_seguros(seguros)
+        
         #pega os morte certa
         for dado in conhecimento:
             if dado.find("buraco") != -1 and dado.find("True") != -1:
@@ -141,24 +174,52 @@ class Agete:
                     morte.append(fato_coord)
 
         #pega os perigosos
-        #As deduções são no formato [x,y] (b v w) (T v F)
-        #aqui usa as deduções. Elas podem ser contraditórias? Acho que sim. Pode ter dedução False?
-        #Não tem dedução de False! Então n tem contraditórias
-        #Deduzir para achar o proximo movimento, aka "Falses"
+        #As deduções são no formato [x,y] (b v w) (T)
+        #aqui usa as deduções. Elas podem ser contraditórias?
+        #Não tem dedução de False. Então n tem contraditórias
         for deducao in inferencias:
-            #se deduzir que não tem nem wumpus nem
-            if deducao:
-                pass
+            dedu_coord = deducao[8:15]
+            perigosos.append(dedu_coord)
 
-        
+        #tenho uma lista com os seguros, com os perigosos e com os mortes
 
         #escrever a posição atual, o conhecimento e as inferencias em um txt
 
         #tomar as decisões
-        #primeiro conferir os fatos. Se of fatos não derem o prox passo, vai pra dedução?
-        #não!
-        #se os fatos n derem prox_p, voltar pro quadrado seguro e buscar outro seguro
-        pass
+        #se tiver um quadrado seguro ao lado, ir pra ele...apenas se não foi explorado!
+        #decide pelo vizinho seguro não explorado
+        if len(seguros) > 0:
+            for s in seguros:
+                if self.consulta_seguros(s):
+                    return s
+
+        #se ainda tiver quadrados seguros que não foram explorados, ir para eles
+        if len(self.seguros_inexplorados) != 0:
+            #ir para o quadrado seguro mais perto, passando por um caminho seguro
+            #fazer essa função
+            pass
+        
+
+        #acabou os quadrados seguros inexplorados
+        vizinho_inexplorado = []
+        if len(self.seguros_inexplorados) == 0:
+            #começa a deduzir. Quanto mais menções na lista de perigosos, menos vontade de ir pra la
+            for viz in vizinhos:
+                if self.consulta_visitado(viz):
+                    pass
+                else:
+                    vizinho_inexplorado.append(viz)
+
+        #pegando o vizinho menos perigoso da lista dos perigosos
+        bom_vizin = vizinho_inexplorado[0]
+        periculosidade = perigosos.count(bom_vizin)
+
+        for vizin in vizinho_inexplorado:
+            if perigosos.count(vizin) < periculosidade:
+                bom_vizin = vizin
+
+        return bom_vizin
+
 
 #como fazer esse agente?
 #preciso me mover pelo ambiente
