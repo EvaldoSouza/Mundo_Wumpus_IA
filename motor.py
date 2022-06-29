@@ -4,21 +4,20 @@
 
 import utils
 class Motor:
-    def __init__(self, linhas, colunas, marcar) -> None:
+    def __init__(self, linhas, colunas) -> None:
         self.bc = None
         self.tam_ambiente = [linhas, colunas]
-        self.cria_bc(marcar) #sera que posso fazer isso?
-        pass
+        self.abrir_bc()
     
     #cria o arquivo da base de conhecimento
     def cria_bc(self, marcar):
         
-        bc = open(str(marcar)+'_knowlede_base.txt', 'a')
+        bc = open(str(marcar)+'_knowlede_base.txt', 'a+')
         bc.write("#base de conhecimento do mundo de Wumpus\n")
         self.bc = bc
     
-    def abrir_bc(self, marcar):
-        bc = open(str(marcar)+'_knowlede_base.txt', 'r+')
+    def abrir_bc(self):
+        bc = open('knowlede_base.txt', 'r+')
         self.bc = bc   
     
     def fechar_bc(self):
@@ -38,14 +37,15 @@ class Motor:
 
     #limpa deducoes comprovadamente falsas (usando fatos)
     def _limpar_deducoes(self, fato: str):
-        base_conhecimento = self.bc.readlines()
 
+        base_conhecimento = self.bc.readlines()
         fato_coord = fato[5:12]
         fato_tema = fato[13:19]
         fato_estado = fato[21:]
         #print(fato_estado)
         for linha in base_conhecimento:
             if linha.find("deducao") != -1:
+                print(linha)
                 #checando se a deducao é na msm quadrado e msm tema
                 if linha.find(fato_coord) != -1 and linha.find(fato_tema) != -1:
                     self._deletar_linha(linha)
@@ -86,8 +86,9 @@ class Motor:
         #(se 1,1: brisa) então ((1,2: buraco) ou (2,1: buraco) ou (0,1: buraco)), e (1,2: sem buraco), então ((2,1: buraco) ou (0,1: buraco))
         # anota apenas (se 1,1: brisa) então ((2,1: buraco) ou (0,1: buraco))
         #cuidado que essa lógica começa a ficar fudida
-        
+        self._anotar_bc(percepcoes, coordenadas)
         vizinhos = utils.vizinhos(coordenadas, self.tam_ambiente)
+        self.abrir_bc()
         dados = []
         
         #inferindo ao redor
@@ -115,11 +116,18 @@ class Motor:
 
         #preciso criar um tipo diferente de conhecimento? = deducao?
         for d in dados:
+            flag = True
             frase = "deducao " + str(d[0])+ ' (' + d[1] + ", True)" +'\n'
-            self.bc.write(frase)
+            for conhecimento in base:
+                if conhecimento.find(frase) != -1:
+                    flag = False
+            if flag:
+                self.bc.write(frase)
             #vai escrever um monte de deducao repetida, acho que nao tem problema
             #quando provar que uma deducao é falsa, remove todas da base
             #quando for tomar uma decisao, usar um contador, quanto mais deducoes iguais, mais provavel
+        
+        #self._anotar_bc(percepcoes, coordenadas)
 
 
     def fatos(self, coordenadas):
@@ -153,20 +161,21 @@ class Motor:
         return lista_de_deducoes
 
 
-# percepicoes = {
-#             "wumpus" : False,
-#             "ouro" : False,
-#             "buraco" : False,
-#             "fedor": True,
-#             "brisa" :True
-#         }
-# novo = Motor()
-# #novo.cria_bc('Alpha')
-# novo.abrir_bc('Alpha')
-# fato = "deducao [0, 2] (wumpus, True)\n"
-# # novo._anotar_bc(percepicoes, [2,2])
-# # novo.abrir_bc('Alpha') #tenho que abrir de novo, pq a func fecha automaticamente
-# #novo._inferir([1,2], percepicoes)
-# #novo._limpar_deducoes(fato)
-# #novo._deletar_linha(fato)
-# novo.fatos([2,1])
+percepicoes = {
+            "wumpus" : False,
+            "ouro" : False,
+            "buraco" : False,
+            "fedor": True,
+            "brisa" :True
+        }
+novo = Motor(4,4,)
+#novo.cria_bc('Alpha')
+novo.abrir_bc()
+fato = "fato [0, 2] (wumpus, False)\n"
+#novo._anotar_bc(percepicoes, [0,2])
+
+# novo.abrir_bc('Alpha') #tenho que abrir de novo, pq a func fecha automaticamente
+novo.inferir([1,2], percepicoes)
+novo._limpar_deducoes(fato)
+#novo._deletar_linha(fato)
+#novo.fatos([2,1])

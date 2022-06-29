@@ -19,7 +19,7 @@ class Quadrado:
     
     #vou acessar as variaveis diretamente
     def imprimir(self):
-        print("Wumpus: ", self.wumpus, ". Ouro: ", self.ouro, ". Buraco:", self.buraco, ". Fedor:", self.fedor, ". Brilho: ", self.brilho, ". Brisa: ", self.brisa)
+        print("Wumpus: ", self.wumpus, ". Ouro: ", self.ouro, ". Buraco:", self.buraco, ". Fedor:", self.fedor, ". Brisa: ", self.brisa)
 
     def retorna_dict(self):
         percepicoes = {
@@ -84,8 +84,8 @@ class Ambiente:
                         espaco[l][c].buraco = True
                     if coisa == "Wumpus":
                         #fazer o wumpus ter chance cair em um buraco ou em cima do ouro
-                        lin = random.randrange(self.linhas)
-                        col = random.randrange(self.colunas)
+                        lin = random.randrange(1,self.linhas)
+                        col = random.randrange(1,self.colunas)
                         espaco[lin][col].wumpus = True
                     if coisa == "Ouro":
                         espaco[l][c].ouro = True
@@ -136,5 +136,3 @@ class Ambiente:
         return espaco
         #self.imprimir(espaco)
 
-quad = Quadrado()
-print(quad.wumpus)

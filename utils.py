@@ -17,3 +17,4 @@ def vizinhos(coordenadas, dimensoes):
             vizin.remove(posicao)
     
     return vizin
+
